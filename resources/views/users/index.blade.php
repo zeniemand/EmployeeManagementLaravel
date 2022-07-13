@@ -24,7 +24,27 @@
                     {{ session('error') }}
                 </div>
             @endif
-            <a href="{{ route('users.create') }}" class="btn btn-primary float-right">Create user</a>
+                <div class="row">
+                    <div class="col">
+                        <form method="GET" action="{{ route('users.index') }}">
+                            <div class="form-row align-items-center">
+                                <div class="col">
+                                    <input type="search"
+                                           name="search"
+                                           class="form-control mb-2"
+                                           id="search"
+                                           placeholder="Jane Doe">
+                                </div>
+                                <div class="col">
+                                    <button type="submit" class="btn btn-primary mb-2">Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col">
+                        <a href="{{ route('users.create') }}" class="btn btn-primary mb-2 float-right">Create user</a>
+                    </div>
+                </div>
         </div>
         <div class="card-body">
             <table class="table">
