@@ -9,7 +9,22 @@
 
     <div class="card">
         <div class="card-header">
-            <a href="{{ route('users.create') }}" class="float-right">Create user</a>
+            @if (session('message'))
+                <div class="alert alert-success" role="alert">
+                    {{ session('message') }}
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="alert alert-danger" role="alert">
+                    {{ session('error') }}
+                </div>
+            @endif
+            @if(session()->has('error'))
+                <div class="alert alert-danger" role="alert">
+                    {{ session('error') }}
+                </div>
+            @endif
+            <a href="{{ route('users.create') }}" class="btn btn-primary float-right">Create user</a>
         </div>
         <div class="card-body">
             <table class="table">
@@ -27,14 +42,19 @@
                         <th scope="row">{{ $user->id }}</th>
                         <td>{{ $user->username }}</td>
                         <td>{{ $user->email }}</td>
-                        <td>Edit/Delete</td>
+                        <td class="form-inline">
+                            <a href="{{ route('users.edit', $user->id ) }}" class="btn btn-success">Edit</a>
+                            <form action="{{ route('users.destroy', $user->id) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-danger ml-2">Delete</button>
+                            </form>
+                        </td>
                     </tr>
                 @endforeach
                 </tbody>
             </table>
         </div>
     </div>
-
-
 
 @endsection
