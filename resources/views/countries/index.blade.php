@@ -64,7 +64,10 @@
                         <td>{{ $country->country_code }}</td>
                         <td class="form-inline">
                             <a href="{{ route('countries.edit', $country->id ) }}" class="btn btn-success">Edit</a>
-                            <form action="{{ route('countries.destroy', $country->id) }}" method="POST">
+                            <form action="{{ route('countries.destroy', $country->id) }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Are you sure to delete?')"
+                            >
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-danger ml-2">Delete</button>

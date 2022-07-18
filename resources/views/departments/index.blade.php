@@ -4,7 +4,7 @@
 
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">States</h1>
+        <h1 class="h3 mb-0 text-gray-800">Departments</h1>
     </div>
 
     <div class="card">
@@ -26,7 +26,7 @@
             @endif
             <div class="row">
                 <div class="col">
-                    <form method="GET" action="{{ route('states.index') }}">
+                    <form method="GET" action="{{ route('departments.index') }}">
                         <div class="form-row align-items-center">
                             <div class="col">
                                 <input type="search"
@@ -42,7 +42,7 @@
                     </form>
                 </div>
                 <div class="col">
-                    <a href="{{ route('states.create') }}" class="btn btn-primary mb-2 float-right">Create state</a>
+                    <a href="{{ route('departments.create') }}" class="btn btn-primary mb-2 float-right">Create department</a>
                 </div>
             </div>
         </div>
@@ -51,26 +51,24 @@
                 <thead>
                 <tr>
                     <th scope="col">#Id</th>
-                    <th scope="col">State name</th>
-                    <th scope="col">Country code</th>
+                    <th scope="col">Department name</th>
                     <th scope="col">Action</th>
                 </tr>
                 </thead>
                 <tbody>
-                @foreach($states as $state)
+                @foreach($departments as $department)
                     <tr>
-                        <th scope="row">{{ $state->id }}</th>
-                        <td>{{ $state->name }}</td>
-                        <td>{{ $state->country->country_code }}</td>
+                        <th scope="row">{{ $department->id }}</th>
+                        <td>{{ $department->name }}</td>
                         <td class="form-inline">
-                            <a href="{{ route('states.edit', $state->id ) }}" class="btn btn-success">Edit</a>
-                            <form action="{{ route('states.destroy', $state->id) }}"
+                            <a href="{{ route('departments.edit', $department->id ) }}" class="btn btn-success">Edit</a>
+                            <form action="{{ route('departments.destroy', $department->id) }}"
                                   method="POST"
                                   onsubmit="return confirm('Are you sure to delete?')"
                             >
                                 @csrf
                                 @method('DELETE')
-                                <button class="btn btn-danger ml-2">Delete</button>
+                                <button class="btn btn-danger ml-2" >Delete</button>
                             </form>
                         </td>
                     </tr>
@@ -81,4 +79,3 @@
     </div>
 
 @endsection
-
