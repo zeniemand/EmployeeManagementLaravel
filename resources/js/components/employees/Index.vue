@@ -27,12 +27,12 @@
                                 </form>
                             </div>
                             <div class="col">
-                                <a href="#" class="btn btn-primary mb-2 float-right">Create employee</a>
+                                <router-link :to="{name: 'EmployeesCreate'}" class="btn btn-primary mb-2 float-right" >Create employee</router-link>
                             </div>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <table class="table">
+                    <div class="card-body overflow-auto">
+                        <table class="card-table table">
                             <thead>
                             <tr>
                                 <th scope="col">#Id</th>
@@ -65,12 +65,18 @@
                                 <td></td>
                                 <td></td>
                                 <td class="form-inline">
-                                    <a href="#" class="btn btn-success">Edit</a>
+                                    <router-link :to="{
+                                        name: 'EmployeesEdit',
+                                        // params: {
+                                        //     id: employee.id
+                                        // }
+                                    }"
+                                                 class="btn btn-success">Edit</router-link>
                                     <form action="#"
                                           method="POST"
                                           onsubmit="return confirm('Are you sure to delete?')"
                                     >
-                                        <button class="btn btn-danger ml-2">Delete</button>
+                                        <button class="btn btn-danger ml-2 ">Delete</button>
                                     </form>
                                 </td>
                             </tr>
@@ -85,7 +91,22 @@
 
 <script>
 export default {
-    name: "index"
+    name: "index",
+    data(){
+        return {
+            employees: [],
+        }
+    },
+    created() {
+        this.employees = this.getEmployees();
+    },
+    methods: {
+        getEmployees(){
+            axios.get("api/employees")
+                .then(res => this.employees = res.data.data)
+                .catch(error => console.error(error));
+        }
+    }
 }
 </script>
 
