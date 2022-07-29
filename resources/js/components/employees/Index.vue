@@ -7,6 +7,11 @@
                     <h1 class="h3 mb-0 text-gray-800">Employees</h1>
                 </div>
 
+                <div v-if="message" class="alert alert-success" role="alert">
+                    {{ message }}
+                </div>
+
+
                 <div class="card">
                     <div class="card-header">
                         <div class="row">
@@ -51,33 +56,28 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <th scope="row"></th>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+                            <tr v-for="employee in employees" :key="employee.id">
+                                <th scope="row">#{{ employee.id }}</th>
+                                <td>{{ employee.first_name }}</td>
+                                <td>{{ employee.last_name }}</td>
+                                <td>{{ employee.middle_name }}</td>
+                                <td>{{ employee.address }}</td>
+                                <td>{{ employee.department }}</td>
+                                <td>{{ employee.city }}</td>
+                                <td>{{ employee.state }}</td>
+                                <td>{{ employee.country }}</td>
+                                <td>{{ employee.zip_code }}</td>
+                                <td>{{ format_date(employee.birthdate) }}</td>
+                                <td>{{ format_date(employee.date_hired) }}</td>
                                 <td class="form-inline">
                                     <router-link :to="{
                                         name: 'EmployeesEdit',
-                                        // params: {
-                                        //     id: employee.id
-                                        // }
+                                        params: {
+                                            id: employee.id
+                                        }
                                     }"
                                                  class="btn btn-success">Edit</router-link>
-                                    <form action="#"
-                                          method="POST"
-                                          onsubmit="return confirm('Are you sure to delete?')"
-                                    >
-                                        <button class="btn btn-danger ml-2 ">Delete</button>
-                                    </form>
+                                    <button class="btn btn-danger ml-2 " @click="deleteEmployee(employee.id)" >Delete</button>
                                 </td>
                             </tr>
                             </tbody>
@@ -90,11 +90,14 @@
 </template>
 
 <script>
+import moment from "moment";
+
 export default {
     name: "index",
     data(){
         return {
             employees: [],
+            message: false,
         }
     },
     created() {
@@ -105,7 +108,24 @@ export default {
             axios.get("api/employees")
                 .then(res => this.employees = res.data.data)
                 .catch(error => console.error(error));
-        }
+        },
+        format_date(val) {
+            if (val) {
+                return moment(new Date(val)).format('YYYY-MM-DD');
+            }
+        },
+        async deleteEmployee(id) {
+            if(confirm('Are you sure to delete?')){
+                let deletedEmployeeName = '';
+                await axios.delete('/api/employees/' + id)
+                    .then(res => {
+                        deletedEmployeeName = res.data.employeeName
+                    })
+                    .catch(error => console.error(error));
+                this.employees = this.getEmployees();
+                this.message = `Employee: \' ${deletedEmployeeName} \' deleted successfully `;
+            }
+        },
     }
 }
 </script>

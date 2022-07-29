@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeeStoreRequest;
+use App\Http\Resources\EmployeeResource;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,7 @@ class EmployeeController extends Controller
     public function index()
     {
         $employees = Employee::all();
-        return response()->json($employees);
+        return EmployeeResource::collection($employees);
     }
 
     /**
@@ -82,8 +83,10 @@ class EmployeeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Employee $employee)
     {
-        //
+        $employeeName = $employee->first_name;
+        $employee->delete();
+        return response()->json(compact('employeeName'));
     }
 }
