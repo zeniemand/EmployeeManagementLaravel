@@ -103,6 +103,12 @@ export default {
     created() {
         this.employees = this.getEmployees();
     },
+    mounted() {
+        if (localStorage.message) {
+            this.message = localStorage.message;
+            localStorage.removeItem('message');
+        }
+    },
     methods: {
         getEmployees(){
             axios.get("api/employees")

@@ -271,10 +271,14 @@ export default {
                 .catch(error => console.error(error));
         },
         store() {
-            console.log('yyyess');
-            this.form.birthdate = this.format_date(this.form.birthdate);
-            this.form.date_hired = this.format_date(this.form.date_hired);
-            axios.post('/api/employees', this.form).then( res => console.log(res)).catch(error => console.error(error));
+            this.form.birthdate = this.form.birthdate ? this.format_date(this.form.birthdate) : null;
+            this.form.date_hired = this.form.date_hired ? this.format_date(this.form.date_hired) : null;
+            axios.post('/api/employees', this.form)
+                .then( res => {
+                    localStorage.message = `Employee ${res.data.employee.first_name} created successfully`;
+                    this.$router.push({ name: 'EmployeesIndex'});
+                })
+                .catch(error => console.error(error));
         },
         format_date(val) {
             if (val) {
