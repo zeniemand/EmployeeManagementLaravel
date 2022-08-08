@@ -2349,17 +2349,34 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "index",
   data: function data() {
     return {
       employees: [],
-      message: false
+      message: false,
+      suggestions: [],
+      search: null,
+      selectedDepartment: null,
+      departments: []
     };
   },
   created: function created() {
-    this.employees = this.getEmployees();
+    this.getDepartments();
+    this.getEmployees();
   },
   mounted: function mounted() {
     if (localStorage.message) {
@@ -2367,12 +2384,51 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       localStorage.removeItem('message');
     }
   },
+  watch: {
+    selectedDepartment: function selectedDepartment() {
+      this.getEmployees();
+    }
+  },
   methods: {
-    getEmployees: function getEmployees() {
+    searchName: function searchName() {
       var _this = this;
 
-      axios.get("api/employees").then(function (res) {
-        return _this.employees = res.data.data;
+      if (this.search) {
+        this.suggestions = Object.keys(this.employees).reduce(function (prev, item, index) {
+          if (_this.employees[item]['first_name'].toLowerCase().startsWith(_this.search.toLowerCase())) {
+            prev.push(_this.employees[item]['first_name']);
+          }
+
+          if (_this.employees[item]['last_name'].toLowerCase().startsWith(_this.search.toLowerCase())) {
+            prev.push(_this.employees[item]['last_name']);
+          }
+
+          return prev;
+        }, []);
+        return this.suggestions = _toConsumableArray(new Set(this.suggestions));
+      }
+
+      return this.suggestions = [];
+    },
+    getEmployees: function getEmployees() {
+      var _this2 = this;
+
+      axios.get("api/employees", {
+        params: {
+          search: this.search,
+          department_id: this.selectedDepartment
+        }
+      }).then(function (res) {
+        return _this2.employees = res.data.data;
+      })["catch"](function (error) {
+        return console.error(error);
+      });
+    },
+    getDepartments: function getDepartments() {
+      var _this3 = this;
+
+      axios.get("api/employees/departments").then(function (res) {
+        return _this3.departments = res.data;
       })["catch"](function (error) {
         return console.error(error);
       });
@@ -2383,7 +2439,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }
     },
     deleteEmployee: function deleteEmployee(id) {
-      var _this2 = this;
+      var _this4 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
         var deletedEmployeeName;
@@ -2405,8 +2461,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 });
 
               case 4:
-                _this2.employees = _this2.getEmployees();
-                _this2.message = "Employee: ' ".concat(deletedEmployeeName, " ' deleted successfully ");
+                _this4.employees = _this4.getEmployees();
+                _this4.message = "Employee: ' ".concat(deletedEmployeeName, " ' deleted successfully ");
 
               case 6:
               case "end":
@@ -2415,6 +2471,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           }
         }, _callee);
       }))();
+    },
+    setFilter: function setFilter(item) {
+      this.search = item;
+      this.suggestions = [];
+      this.getEmployees();
     }
   }
 });
@@ -3610,7 +3671,106 @@ var render = function render() {
     staticClass: "card-header"
   }, [_c("div", {
     staticClass: "row"
-  }, [_vm._m(1), _vm._v(" "), _c("div", {
+  }, [_c("div", {
+    staticClass: "col"
+  }, [_c("form", {
+    attrs: {
+      method: "GET",
+      action: "#"
+    }
+  }, [_c("div", {
+    staticClass: "form-row align-items-center"
+  }, [_c("div", {
+    staticClass: "col"
+  }, [_c("input", {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.search,
+      expression: "search"
+    }],
+    staticClass: "form-control mb-2",
+    attrs: {
+      type: "search",
+      placeholder: "search name"
+    },
+    domProps: {
+      value: _vm.search
+    },
+    on: {
+      input: [function ($event) {
+        if ($event.target.composing) return;
+        _vm.search = $event.target.value;
+      }, function ($event) {
+        return _vm.searchName();
+      }]
+    }
+  }), _vm._v(" "), _vm.suggestions ? _c("div", {
+    staticStyle: {
+      position: "absolute",
+      "z-index": "10"
+    }
+  }, _vm._l(_vm.suggestions, function (suggestion) {
+    return _c("ul", {
+      key: suggestion,
+      staticClass: "list-group"
+    }, [_c("li", {
+      staticClass: "btn list-group-item",
+      on: {
+        click: function click($event) {
+          return _vm.setFilter(suggestion);
+        }
+      }
+    }, [_vm._v(_vm._s(suggestion))])]);
+  }), 0) : _vm._e()]), _vm._v(" "), _c("div", {
+    staticClass: "col"
+  }, [_c("button", {
+    staticClass: "btn btn-primary mb-2",
+    attrs: {
+      type: "submit"
+    },
+    on: {
+      click: function click($event) {
+        $event.preventDefault();
+        return _vm.setFilter(_vm.search);
+      }
+    }
+  }, [_vm._v("Search")])])])])]), _vm._v(" "), _c("div", {
+    staticClass: "col"
+  }, [_c("div", {
+    staticClass: "btn btn-primary mb-2"
+  }, [_vm._v("\n                                    Filter by depertment:\n                                ")]), _vm._v(" "), _c("div", {
+    staticClass: "float-right"
+  }, [_c("select", {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.selectedDepartment,
+      expression: "selectedDepartment"
+    }],
+    staticClass: "custom-select",
+    attrs: {
+      id: "department_choose"
+    },
+    on: {
+      change: function change($event) {
+        var $$selectedVal = Array.prototype.filter.call($event.target.options, function (o) {
+          return o.selected;
+        }).map(function (o) {
+          var val = "_value" in o ? o._value : o.value;
+          return val;
+        });
+        _vm.selectedDepartment = $event.target.multiple ? $$selectedVal : $$selectedVal[0];
+      }
+    }
+  }, _vm._l(_vm.departments, function (department) {
+    return _c("option", {
+      key: department.id,
+      domProps: {
+        value: department.id
+      }
+    }, [_vm._v("\n                                            " + _vm._s(department.name) + "\n                                        ")]);
+  }), 0)])]), _vm._v(" "), _c("div", {
     staticClass: "col"
   }, [_c("router-link", {
     staticClass: "btn btn-primary mb-2 float-right",
@@ -3623,7 +3783,7 @@ var render = function render() {
     staticClass: "card-body overflow-auto"
   }, [_c("table", {
     staticClass: "card-table table"
-  }, [_vm._m(2), _vm._v(" "), _c("tbody", _vm._l(_vm.employees, function (employee) {
+  }, [_vm._m(1), _vm._v(" "), _c("tbody", _vm._l(_vm.employees, function (employee) {
     return _c("tr", {
       key: employee.id
     }, [_c("th", {
@@ -3662,37 +3822,6 @@ var staticRenderFns = [function () {
   }, [_c("h1", {
     staticClass: "h3 mb-0 text-gray-800"
   }, [_vm._v("Employees")])]);
-}, function () {
-  var _vm = this,
-      _c = _vm._self._c;
-
-  return _c("div", {
-    staticClass: "col"
-  }, [_c("form", {
-    attrs: {
-      method: "GET",
-      action: "#"
-    }
-  }, [_c("div", {
-    staticClass: "form-row align-items-center"
-  }, [_c("div", {
-    staticClass: "col"
-  }, [_c("input", {
-    staticClass: "form-control mb-2",
-    attrs: {
-      type: "search",
-      name: "search",
-      id: "search",
-      placeholder: "search name"
-    }
-  })]), _vm._v(" "), _c("div", {
-    staticClass: "col"
-  }, [_c("button", {
-    staticClass: "btn btn-primary mb-2",
-    attrs: {
-      type: "submit"
-    }
-  }, [_vm._v("Search")])])])])]);
 }, function () {
   var _vm = this,
       _c = _vm._self._c;

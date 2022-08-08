@@ -20,16 +20,39 @@
                                     <div class="form-row align-items-center">
                                         <div class="col">
                                             <input type="search"
-                                                   name="search"
+                                                   v-model="search"
                                                    class="form-control mb-2"
-                                                   id="search"
+                                                   @input="searchName()"
                                                    placeholder="search name">
+                                            <div  v-if="suggestions" style="position: absolute;z-index: 10;">
+                                                <ul class="list-group" v-for="suggestion in suggestions" :key="suggestion">
+                                                    <li class="btn list-group-item" @click="setFilter(suggestion)"  >{{ suggestion }}</li>
+                                                </ul>
+                                            </div>
                                         </div>
+
+
                                         <div class="col">
-                                            <button type="submit" class="btn btn-primary mb-2">Search</button>
+                                            <button type="submit" class="btn btn-primary mb-2" @click.prevent="setFilter(search)">Search</button>
                                         </div>
                                     </div>
                                 </form>
+                            </div>
+                            <div class="col">
+                                <div class="btn btn-primary mb-2">
+                                    Filter by depertment:
+                                </div>
+                                <div class="float-right">
+                                    <select class="custom-select"
+                                            v-model="selectedDepartment"
+                                            id="department_choose">
+                                        <option v-for="department in departments"
+                                                :key="department.id"
+                                                :value="department.id">
+                                            {{ department.name }}
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="col">
                                 <router-link :to="{name: 'EmployeesCreate'}" class="btn btn-primary mb-2 float-right" >Create employee</router-link>
@@ -98,10 +121,15 @@ export default {
         return {
             employees: [],
             message: false,
+            suggestions: [],
+            search: null,
+            selectedDepartment: null,
+            departments: [],
         }
     },
     created() {
-        this.employees = this.getEmployees();
+        this.getDepartments();
+        this.getEmployees();
     },
     mounted() {
         if (localStorage.message) {
@@ -109,10 +137,40 @@ export default {
             localStorage.removeItem('message');
         }
     },
+    watch: {
+        selectedDepartment() {
+            this.getEmployees();
+        },
+    },
     methods: {
+        searchName() {
+            if(this.search){
+                this.suggestions = Object.keys(this.employees).reduce((prev, item, index) => {
+                    if (this.employees[item]['first_name'].toLowerCase().startsWith(this.search.toLowerCase())) {
+                        prev.push(this.employees[item]['first_name']);
+                    }
+                    if (this.employees[item]['last_name'].toLowerCase().startsWith(this.search.toLowerCase())) {
+                        prev.push(this.employees[item]['last_name']);
+                    }
+                    return prev
+                }, []);
+                return this.suggestions = [...new Set(this.suggestions)];
+            }
+            return this.suggestions = [];
+        },
         getEmployees(){
-            axios.get("api/employees")
+            axios.get("api/employees", {
+                params: {
+                    search: this.search,
+                    department_id: this.selectedDepartment
+                }
+            })
                 .then(res => this.employees = res.data.data)
+                .catch(error => console.error(error));
+        },
+        getDepartments() {
+            axios.get("api/employees/departments")
+                .then( res => this.departments = res.data)
                 .catch(error => console.error(error));
         },
         format_date(val) {
@@ -131,6 +189,11 @@ export default {
                 this.employees = this.getEmployees();
                 this.message = `Employee: \' ${deletedEmployeeName} \' deleted successfully `;
             }
+        },
+        setFilter(item) {
+            this.search = item;
+            this.suggestions = [];
+            this.getEmployees();
         },
     }
 }
